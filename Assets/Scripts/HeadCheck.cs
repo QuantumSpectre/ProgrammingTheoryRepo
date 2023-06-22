@@ -5,7 +5,7 @@ using UnityEngine;
 public class HeadCheck : MonoBehaviour
 {
     [SerializeField]  Enemy parentEnemy;
-    
+    [SerializeField] private float bounceForce;
     
 
     // Start is called before the first frame update
@@ -22,6 +22,9 @@ public class HeadCheck : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        Rigidbody2D playerRB = collision.gameObject.GetComponent<Rigidbody2D>();
+        playerRB.velocity = new Vector2(playerRB.velocity.x, bounceForce);
+        
         parentEnemy.Death();
     }
 
