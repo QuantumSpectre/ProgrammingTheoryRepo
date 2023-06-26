@@ -14,12 +14,12 @@ public class EnemySpawner : MonoBehaviour
     private void FixedUpdate()
     {
         
-
+        //spawn enemies if below max count
         if (enemies.Count < maxEnemyCount)
         {
             SpawnEnemy();
         }
-
+        //list to manage enemies and their count
         List<GameObject> enemiesToRemove = new List<GameObject>();
 
         foreach (GameObject enemy in enemies)
@@ -29,7 +29,9 @@ public class EnemySpawner : MonoBehaviour
                 enemiesToRemove.Add(enemy);
             }
         }
-
+        //seperate list to manage enemies that should be removed
+        //two lists because a list cannot be edited on the same iteration that it's declared
+        //so a seperate list will edit the initial list on the second iteration
         foreach (GameObject enemyToRemove in enemiesToRemove)
         {
             enemies.Remove(enemyToRemove);
@@ -37,7 +39,7 @@ public class EnemySpawner : MonoBehaviour
     }
 
     public void SpawnEnemy()
-    {
+    {   //simple instantiate within a small range
         enemies.Add(Instantiate(enemyPrefab, spawnPoint.position + new Vector3((Random.Range(2, 9)), 0), Quaternion.identity));
     }
 }

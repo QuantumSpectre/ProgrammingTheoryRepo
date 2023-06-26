@@ -6,7 +6,8 @@ public class GroundCheck : MonoBehaviour
 {
     public bool IsGrounded {  get; private set; }
 
-    
+    //separate groundcheck object so we can plug into different things
+    //this may be unnecessary in the future
    
 
 
@@ -23,7 +24,7 @@ public class GroundCheck : MonoBehaviour
 
     }
 
-
+    //on collision check if its the ground you are colliding with
     private void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.collider.CompareTag("Ground"))
@@ -33,7 +34,7 @@ public class GroundCheck : MonoBehaviour
     }
 
     private void OnCollisionExit2D(Collision2D collision)
-    {
+    {//once you leave that collission, no longer grounded
         if (collision.gameObject.CompareTag("Ground"))
         {
             IsGrounded = false;
