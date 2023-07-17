@@ -6,82 +6,176 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    // Properties
+    public float health = 1;
     public float moveSpeed = 5f;
     public float jumpForce = 5f;
     private Rigidbody2D rb;
     [SerializeField] private GroundCheck groundCheck;
     private Animator animator;
     private bool isFlipped = false;
+    private float h;
 
+    public bool isPaused = false;
+    public bool canPause = true;
+
+    // Audio stuff
     public AudioSource aSource;
     public AudioClip jumpClip;
     public bool canJumpSound = true;
+    public GameObject deathSoundPrefab;
+
+    private bool isAttacking = false;
+
     private void Awake()
     {
-      rb = GetComponent<Rigidbody2D>();
-      animator = GetComponent<Animator>();  
-      aSource = GetComponent<AudioSource>();
-      
+        rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+        aSource = GetComponent<AudioSource>();
     }
 
     private void Update()
     {
-        //Capture input
-        float h = Input.GetAxis("Horizontal");
+        // Capture input
+        float nH = Input.GetAxis("Horizontal");
+        // For use in flip()
+        h = nH;
 
-        //movement
-        if (h != 0f)
+        // Movement
+        if (nH != 0f)
         {
             if (groundCheck.IsGrounded)
             {
-               animator.SetInteger("IsRunning", 1);
+                animator.SetInteger("IsRunning", 1);
             }
-           
-            rb.transform.position += new Vector3(h * moveSpeed * Time.deltaTime, 0);
 
-        } else { animator.SetInteger("IsRunning", 0);  }
-
-        //flip based on H value
-        if (h < 0 && !isFlipped)
+            rb.transform.position += new Vector3(nH * moveSpeed * Time.deltaTime, 0);
+        }
+        else
         {
-            transform.localScale = new Vector3(transform.localScale.x * -1, transform.localScale.y, transform.localScale.z);
-            isFlipped = true;
+            animator.SetInteger("IsRunning", 0);
         }
 
-        if (h > 0 && isFlipped) 
+        if (Input.GetButtonDown("Attack") && !isAttacking)
         {
-            transform.localScale = new Vector3(transform.localScale.x * -1, transform.localScale.y, transform.localScale.z);
-            isFlipped = false;
+            StartCoroutine(PerformAttack());
         }
 
-        //Jump
+        // Flip based on H value
+        Flip();
+
+        // Jump
         if (Input.GetButton("Jump") && groundCheck.IsGrounded)
         {
             animator.SetInteger("IsJumping", 1);
             JumpAction();
-        } else { animator.SetInteger("IsJumping", 0); }       
+        }
+        else
+        {
+            animator.SetInteger("IsJumping", 0);
+        }
 
+        // Restrict health values
+        health = Mathf.Clamp(health, 0f, 1f);
+
+        if (Input.GetButton("Pause") && canPause == true)
+        {
+            TogglePause();
+        }
     }
 
     private void JumpAction()
     {
-        //only play sound if its allowed
+        // Only play sound if it's allowed
         if (canJumpSound == true)
         {
             aSource.PlayOneShot(jumpClip);
             canJumpSound = false;
-            StartCoroutine(SoundCoolDown());
+            StartCoroutine(SoundCooldown());
         }
-        
+
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-        
     }
 
-    //cooldown for the sound that plays when jumping
-    IEnumerator SoundCoolDown()
+    // Cooldown for the sound that plays when jumping
+    IEnumerator SoundCooldown()
     {
         yield return new WaitForSeconds(1);
         canJumpSound = true;
     }
 
+    IEnumerator PerformAttack()
+    {
+        isAttacking = true;
+        animator.SetBool("IsAttacking", true);
+
+        yield return new WaitForSeconds(.02f);
+        animator.SetBool("IsAttacking", false);
+        isAttacking = false;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Enemy"))
+        {
+            health = health - .25f;
+            if (health <= 0f)
+            {
+                Death();
+            }
+        }
+    }
+
+    private void Death()
+    {
+        Instantiate(deathSoundPrefab, gameObject.transform.position, Quaternion.identity);
+        Destroy(gameObject);
+    }
+
+    private void Flip()
+    {
+        var nH = h;
+
+        if (nH < 0 && !isFlipped)
+        {
+            transform.localScale = new Vector3(transform.localScale.x * -1, transform.localScale.y, transform.localScale.z);
+            isFlipped = true;
+        }
+
+        if (nH > 0 && isFlipped)
+        {
+            transform.localScale = new Vector3(transform.localScale.x * -1, transform.localScale.y, transform.localScale.z);
+            isFlipped = false;
+        }
+    }
+
+    private void TogglePause()
+    {
+        if (!canPause) return; // Skip pausing if not allowed
+
+        isPaused = !isPaused;
+
+        if (isPaused)
+        {
+            // Pause the game
+            Time.timeScale = 0f;
+            // Display pause menu or any other relevant actions
+        }
+        else
+        {
+            // Unpause the game
+            Time.timeScale = 1f;
+            // Hide pause menu or any other relevant actions
+        }
+
+        canPause = false;
+        StartCoroutine(PauseCooldown());
+    }
+
+    IEnumerator PauseCooldown()
+    {
+        yield return new WaitForSecondsRealtime(.5f);
+        canPause = true;
+    }
 }
+

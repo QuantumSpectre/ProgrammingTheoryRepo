@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class Enemy : MonoBehaviour
+public class Enemy : SelfDestruct
 {
 
     //BASE enemy class others shall derive from
@@ -18,7 +18,7 @@ public class Enemy : MonoBehaviour
     private bool isWaiting;
 
     //Components
-    private BoxCollider2D col;
+    private CircleCollider2D col;
     private Rigidbody2D rb;
     private SpriteRenderer sRenderer;
     public BoxCollider2D headCol;
@@ -36,7 +36,7 @@ public class Enemy : MonoBehaviour
     {
         sRenderer = GetComponentInChildren<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
-        col = GetComponent<BoxCollider2D>();
+        col = GetComponent<CircleCollider2D>();
         aSource = GetComponent<AudioSource>();
         
     }
@@ -98,26 +98,12 @@ public class Enemy : MonoBehaviour
             {
                 //Response to players
                 case "Player":
-                    JumpForward();
+                    React();
                     break;
 
                 //Response to other enemies
                 case "Enemy":
-                    int randoValue = Random.Range(1, 4);
-                    switch (randoValue)
-                    {
-                        case 1:
-                            JumpForward();
-                            break;
-
-                        case 2:
-                            Flip();
-                            break;
-
-                        case 3:
-                            StartCoroutine(Waiting(Random.Range(1, 6)));
-                            break;
-                    }
+                    React();
                     break;
                 //Response to walls
                 case "Ground":
@@ -158,19 +144,41 @@ public class Enemy : MonoBehaviour
         Destroy(headCol);
         aSource.PlayOneShot(aDeathClip);
 
-        StartCoroutine(SlowDeath());
+        StartCoroutine(SlowDeath(2));
     }
 
-    //Delayed Death
-    IEnumerator SlowDeath()
-    {
-        yield return new WaitForSeconds(1);
-        Destroy(gameObject);
-    }
 
     IEnumerator CoinSpawn()
     {
         yield return new WaitForEndOfFrame();
         Instantiate(coin, transform.position, Quaternion.identity);
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player_attack"))
+        {
+            Debug.Log("Sworded");
+            Death();
+        }
+    }
+
+    private void React()
+    {
+        int randoValue = Random.Range(1, 4);
+        switch (randoValue)
+        {
+            case 1:
+                JumpForward();
+                break;
+
+            case 2:
+                Flip();
+                break;
+
+            case 3:
+                StartCoroutine(Waiting(Random.Range(1, 6)));
+                break;
+        }
     }
 }

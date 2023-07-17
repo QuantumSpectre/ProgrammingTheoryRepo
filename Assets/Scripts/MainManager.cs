@@ -13,6 +13,8 @@ public class MainManager : MonoBehaviour
 
     //UI Stuffs
     public TextMeshProUGUI coinTextUGUI;
+    public Image healthBar;
+    public TextMeshProUGUI pauseScreen;
 
     public int coinCount = 0;
 
@@ -37,6 +39,9 @@ public class MainManager : MonoBehaviour
 
         
         player = GameObject.FindGameObjectWithTag("Player");
+
+
+
     }
 
     private void Start()
@@ -55,7 +60,13 @@ public class MainManager : MonoBehaviour
             player = nPlayer;
         }
 
+        UpdateHealthBar();
 
+        //pause screen enable
+        if (player.GetComponent<PlayerMovement>().isPaused == true) 
+        {
+            pauseScreen.enabled = true;
+        } else { pauseScreen.enabled = false; }
 
     }
 
@@ -70,5 +81,12 @@ public class MainManager : MonoBehaviour
     {
         coinCount++;
         coinTextUGUI.text = "COINS: " + coinCount.ToString();
+    }
+
+    public void UpdateHealthBar()
+    {
+        var playerHealth = player.GetComponent<PlayerMovement>().health;
+        healthBar.GetComponent<RectTransform>().localScale = new Vector3(playerHealth, .8f, 1);
+       
     }
 }
