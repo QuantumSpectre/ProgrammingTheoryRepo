@@ -22,10 +22,13 @@ public class HeadCheck : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {   //simple check to see what collides with head collider. May replace with swtich case later
-        Rigidbody2D playerRB = collision.gameObject.GetComponent<Rigidbody2D>();
-        playerRB.velocity = new Vector2(playerRB.velocity.x, bounceForce);
-        
-        parentEnemy.Death();
+        if (collision.collider.CompareTag("Player")) 
+        {
+            Rigidbody2D playerRB = collision.gameObject.GetComponent<Rigidbody2D>();
+            playerRB.velocity = new Vector2(playerRB.velocity.x, bounceForce);
+            parentEnemy.Death();
+        }
+        collision.rigidbody.velocity = new Vector2(collision.rigidbody.velocity.x, bounceForce);
     }
 
 }

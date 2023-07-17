@@ -1,12 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class MainManager : MonoBehaviour
 {
     public static MainManager Instance;
 
     [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private GameObject player;
+
+    //UI Stuffs
+    public TextMeshProUGUI coinTextUGUI;
+
+    public int coinCount = 0;
+
     
 
     private Transform checkPoint;
@@ -25,6 +34,9 @@ public class MainManager : MonoBehaviour
 
         //initial position of spawnpoint
         checkPoint = gameObject.transform;
+
+        
+        player = GameObject.FindGameObjectWithTag("Player");
     }
 
     private void Start()
@@ -38,8 +50,13 @@ public class MainManager : MonoBehaviour
         //Check for player tagged object, instantiate if none
         if (GameObject.FindWithTag("Player") == null)
         {
-            Instantiate(playerPrefab, checkPoint.position, Quaternion.identity);
+            var nPlayer = Instantiate(playerPrefab, checkPoint.position, Quaternion.identity);
+
+            player = nPlayer;
         }
+
+
+
     }
 
     //Updates the respawn position with checkpoint pos, called by checkpoint gameobjects.
@@ -47,5 +64,11 @@ public class MainManager : MonoBehaviour
     {
         checkPoint = newCheckPoint;
         
+    }
+
+    public void IncreaseCoinCount()
+    {
+        coinCount++;
+        coinTextUGUI.text = "COINS: " + coinCount.ToString();
     }
 }

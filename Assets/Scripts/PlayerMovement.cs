@@ -13,10 +13,15 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator;
     private bool isFlipped = false;
 
+    public AudioSource aSource;
+    public AudioClip jumpClip;
+    public bool canJumpSound = true;
     private void Awake()
     {
       rb = GetComponent<Rigidbody2D>();
       animator = GetComponent<Animator>();  
+      aSource = GetComponent<AudioSource>();
+      
     }
 
     private void Update()
@@ -60,10 +65,23 @@ public class PlayerMovement : MonoBehaviour
 
     private void JumpAction()
     {
+        //only play sound if its allowed
+        if (canJumpSound == true)
+        {
+            aSource.PlayOneShot(jumpClip);
+            canJumpSound = false;
+            StartCoroutine(SoundCoolDown());
+        }
         
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         
     }
 
+    //cooldown for the sound that plays when jumping
+    IEnumerator SoundCoolDown()
+    {
+        yield return new WaitForSeconds(1);
+        canJumpSound = true;
+    }
 
 }
