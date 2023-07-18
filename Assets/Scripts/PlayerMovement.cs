@@ -7,7 +7,12 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     // Properties
-    public float health = 1;
+    //ENCAPSULATION
+    //Gotten publicly by mainmanager but can only be set by this class
+    public float health { get; private set; }
+    
+
+
     public float moveSpeed = 5f;
     public float jumpForce = 5f;
     private Rigidbody2D rb;
@@ -29,6 +34,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Awake()
     {
+        health = 1f;
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         aSource = GetComponent<AudioSource>();
@@ -159,13 +165,13 @@ public class PlayerMovement : MonoBehaviour
         {
             // Pause the game
             Time.timeScale = 0f;
-            // Display pause menu or any other relevant actions
+           
         }
         else
         {
             // Unpause the game
             Time.timeScale = 1f;
-            // Hide pause menu or any other relevant actions
+           
         }
 
         canPause = false;

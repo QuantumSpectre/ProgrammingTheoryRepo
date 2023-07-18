@@ -1,13 +1,16 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SelfDestruct : MonoBehaviour
 {
+
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(SlowDeath(2));
+        StartCoroutine(SlowDeath());
     }
 
     // Update is called once per frame
@@ -16,9 +19,9 @@ public class SelfDestruct : MonoBehaviour
         
     }
 
-    protected IEnumerator SlowDeath(int timeForDeath)
+    protected virtual IEnumerator SlowDeath()
     {
-        yield return new WaitForSeconds(timeForDeath);
+        yield return new WaitForSeconds(1);
         Destroy(this.gameObject);
     }
 }

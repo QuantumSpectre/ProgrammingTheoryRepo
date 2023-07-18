@@ -12,15 +12,15 @@ public class Enemy : SelfDestruct
     public Transform forwardCheck;
     public LayerMask groundLayer;
 
-    private bool isFacingRight = true;
-    private bool isAtLedge = false;
-    private bool isFlipping = false;
-    private bool isWaiting;
+    public bool isFacingRight = true;
+    public bool isAtLedge = false;
+    public bool isFlipping = false;
+    public bool isWaiting;
 
     //Components
-    private CircleCollider2D col;
-    private Rigidbody2D rb;
-    private SpriteRenderer sRenderer;
+    public CircleCollider2D col;
+    public Rigidbody2D rb;
+    public SpriteRenderer sRenderer;
     public BoxCollider2D headCol;
     
 
@@ -41,8 +41,10 @@ public class Enemy : SelfDestruct
         
     }
     //top level update behavior gahyuck!
-    private void Update()
+    void Update()
     {
+        //ABSTRACTION
+        //the method contains a switch case that has a lot of stuff but by using it within a method were able to hide it from view yay
         Scanning();
 
         if (!isWaiting)
@@ -57,7 +59,7 @@ public class Enemy : SelfDestruct
     }
 
     //The man the myth the legend, the cool down
-    private IEnumerator FlipCoolDown()
+    public IEnumerator FlipCoolDown()
     {
         yield return new WaitForSeconds(2);
         isFlipping = false;
@@ -65,7 +67,7 @@ public class Enemy : SelfDestruct
 
     //flip flip flipparoo
     //sets a cooldown and does bool stuffs
-    private void Flip()
+    public void Flip()
     {
         isFlipping = true;
         isFacingRight = !isFacingRight;
@@ -74,7 +76,7 @@ public class Enemy : SelfDestruct
     }
 
     //jumping, also houses groundcheck only called when needing to jump
-    private void JumpForward()
+    public virtual void JumpForward()
     {
         RaycastHit2D groundHit = Physics2D.Raycast(this.transform.position, Vector2.down, .7f, groundLayer);
 
@@ -84,9 +86,9 @@ public class Enemy : SelfDestruct
         }
     }
     //behaviors for forward detection
-    private void Scanning()
+    public virtual void Scanning()
     {   //ledge detection
-        isAtLedge = !Physics2D.Raycast(groundCheck.position, Vector2.down, 5f, groundLayer);
+        isAtLedge = !Physics2D.Raycast(groundCheck.position, Vector2.down, 1.4f, groundLayer);
         //forward detection
         RaycastHit2D hit = Physics2D.Raycast(forwardCheck.position, transform.right, 1f);
 
@@ -116,13 +118,13 @@ public class Enemy : SelfDestruct
         }
     }
     //simple movement based on direction
-    private void Movement()
+    public virtual void Movement()
     {
         rb.velocity = new Vector2(isFacingRight ? speed : -speed, rb.velocity.y);
     }
 
     //simple little waiting script
-    private IEnumerator Waiting(int seconds)
+    public virtual IEnumerator Waiting(int seconds)
     {
         isWaiting = true;
         rb.velocity = Vector2.zero;
@@ -132,6 +134,8 @@ public class Enemy : SelfDestruct
     }
 
     //O sweet release
+
+    //INHERITANCE FROM SELF DESTRUCT CLASS
     public void Death()
     {
 
@@ -144,17 +148,24 @@ public class Enemy : SelfDestruct
         Destroy(headCol);
         aSource.PlayOneShot(aDeathClip);
 
-        StartCoroutine(SlowDeath(2));
+        StartCoroutine(SlowDeath());
     }
 
+    //POLYMORPHISIM
+    //ADJUSTED THE TIME IN WAITFORSECONDS WITH NEW METHOD
+    protected override IEnumerator SlowDeath()
+    {
+        yield return new WaitForSeconds(2);
+        Destroy(gameObject);
+    }
 
-    IEnumerator CoinSpawn()
+    public IEnumerator CoinSpawn()
     {
         yield return new WaitForEndOfFrame();
         Instantiate(coin, transform.position, Quaternion.identity);
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    public void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player_attack"))
         {
@@ -163,7 +174,7 @@ public class Enemy : SelfDestruct
         }
     }
 
-    private void React()
+    public virtual void React()
     {
         int randoValue = Random.Range(1, 4);
         switch (randoValue)
